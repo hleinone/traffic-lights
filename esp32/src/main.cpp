@@ -4,6 +4,11 @@
 #include <BLEScan.h>
 #include <BLEAdvertisedDevice.h>
 
+struct State {
+  int value;
+  unsigned long updated;
+};
+
 static BLEUUID serviceUUID("00001812-0000-1000-8000-00805f9b34fb");
 static BLEUUID charUUID("00002a4d-0000-1000-8000-00805f9b34fb");
 static boolean doConnect = false;
@@ -19,21 +24,20 @@ static const int STATE_STOP = 3;
 static const int STATE_STOP_NEXT = 4;
 static const int STATE_GO = 5;
 static const int STATE_GO_NEXT = 6;
-static int state = STATE_WARNING_OFF;
-static long stateUpdated = 0;
+static State state = {STATE_WARNING_OFF, 0};
 
 void notifyCallback(BLERemoteCharacteristic* pBLERemoteCharacteristic, uint8_t* pData, size_t length, bool isNotify) {
   uint8_t data = *pData;
   if (data == 1) {
     Serial.println("Click");
-    if (state == STATE_WARNING_OFF || state == STATE_WARNING_ON || state == STATE_STOP || state == STATE_STOP_NEXT) {
-      Serial.println("State go next");
-      state = STATE_GO_NEXT;
+    unsigned long currentMicros = micros();
+    if (state.value == STATE_WARNING_OFF || state.value == STATE_WARNING_ON || state.value == STATE_STOP || state.value == STATE_STOP_NEXT) {
+      Serial.printf("State go next %lu\n", currentMicros);
+      state = {STATE_GO_NEXT, currentMicros};
     } else {
-      Serial.println("State stop next");
-      state = STATE_STOP_NEXT;
+      Serial.printf("State stop next %lu\n", currentMicros);
+      state = {STATE_STOP_NEXT, currentMicros};
     }
-    stateUpdated = micros();
   }
 }
 
@@ -46,8 +50,7 @@ class MyClientCallback : public BLEClientCallbacks {
     doScan = true;
     Serial.println("Disconnected");
     Serial.println("State warning off");
-    state = STATE_WARNING_OFF;
-    stateUpdated = micros();
+    state = {STATE_WARNING_OFF, micros()};
   }
 };
 
@@ -69,8 +72,7 @@ bool connectToServer() {
   if (pClient->isConnected()) {
     Serial.println(" - Connected to server");
     Serial.println("State stop");
-    state = STATE_STOP;
-    stateUpdated = micros();
+    state = {STATE_STOP, micros()};
   } else {
     Serial.println(" - Connection failed");
     return false;
@@ -147,50 +149,47 @@ void loop() {
     BLEDevice::getScan()->start(1);
   }
 
-  long currentMicros = micros();
-  if (state == STATE_WARNING_OFF) {
+  unsigned long currentMicros = micros();
+  if (state.value == STATE_WARNING_OFF) {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(AMBER_PIN, LOW);
     digitalWrite(GREEN_PIN, LOW);
-    if (currentMicros > stateUpdated + 1000000) {
+    if (currentMicros > state.updated + 1000000) {
       Serial.println("State warning on");
-      state = STATE_WARNING_ON;
-      stateUpdated = currentMicros;
+      state = {STATE_WARNING_ON, currentMicros};
     }
-  } else if (state == STATE_WARNING_ON) {
+  } else if (state.value == STATE_WARNING_ON) {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(AMBER_PIN, HIGH);
     digitalWrite(GREEN_PIN, LOW);
-    if (currentMicros > stateUpdated + 1000000) {
+    if (currentMicros > state.updated + 1000000) {
       Serial.println("State warning off");
-      state = STATE_WARNING_OFF;
-      stateUpdated = currentMicros;
+      state = {STATE_WARNING_OFF, currentMicros};
     }
-  } else if (state == STATE_GO_NEXT) {
+  } else if (state.value == STATE_GO_NEXT) {
     digitalWrite(RED_PIN, HIGH);
     digitalWrite(AMBER_PIN, HIGH);
     digitalWrite(GREEN_PIN, LOW);
-    if (currentMicros > stateUpdated + 1000000) {
+    if (currentMicros > state.updated + 1000000) {
       Serial.println("State go");
-      state = STATE_GO;
-      stateUpdated = currentMicros;
+      state = {STATE_GO, currentMicros};
     }
-  } else if (state == STATE_GO) {
+  } else if (state.value == STATE_GO) {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(AMBER_PIN, LOW);
     digitalWrite(GREEN_PIN, HIGH);
-  } else if (state == STATE_STOP_NEXT) {
+  } else if (state.value == STATE_STOP_NEXT) {
     digitalWrite(RED_PIN, LOW);
     digitalWrite(AMBER_PIN, HIGH);
     digitalWrite(GREEN_PIN, LOW);
-    if (currentMicros > stateUpdated + 1000000) {
+    if (currentMicros > state.updated + 1000000) {
       Serial.println("State stop");
-      state = STATE_STOP;
-      stateUpdated = currentMicros;
+      state = {STATE_STOP, currentMicros};
     }
-  } else if (state == STATE_STOP) {
+  } else if (state.value == STATE_STOP) {
     digitalWrite(RED_PIN, HIGH);
     digitalWrite(AMBER_PIN, LOW);
     digitalWrite(GREEN_PIN, LOW);
   }
+//  delay(100);
 }
