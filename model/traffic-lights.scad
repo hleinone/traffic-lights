@@ -22,7 +22,7 @@ module screwHolder(h,r) {
     difference() {
         cylinder(h,r,r);
         translate([0,0,-r/2]) {
-            cylinder(5.5,r-0.5,0.2);
+            cylinder(5.5,r-0.5,r-0.5);
         }
     }
 }
@@ -30,97 +30,103 @@ module screwHolder(h,r) {
 module lightsFacade() {
     difference() {
         translate([0,0,-3]) {
-            cube([20,44,5]);
+            cube([20,46,5]);
         }
-        translate([10,34,-5]) {
+        translate([10,36,-5]) {
             cylinder(8,5.2,5.2,false);
         }
-        translate([10,22,-5]) {
+        translate([10,24,-5]) {
             cylinder(8,5.2,5.2,false);
         }
-        translate([10,10,-5]) {
+        translate([10,12,-5]) {
             cylinder(8,5.2,5.2,false);
         }
     }
-    translate([10,34,1]) {
+    translate([10,36,1]) {
         visor();
     }
-    translate([10,22,1]) {
+    translate([10,24,1]) {
         visor();
     }
-    translate([10,10,1]) {
+    translate([10,12,1]) {
         visor();
     }    
 }
 
 module lightsBox() {
-    translate([0,0,-19]) {
-        difference() {
-            cube([20,44,17]);
-            translate([1,1,-0.5]) {
-                cube([18,42,15.5]);
-            }
-            translate([10,34,13]) {
-                cylinder(5,5.2,5.2,false);
-            }
-            translate([10,22,13]) {
-                cylinder(5,5.2,5.2,false);
-            }
-            translate([10,10,13]) {
-                cylinder(5,5.2,5.2,false);
-            }
-            translate([0.5,-0.5,36]) {
-                cube([18,46,2.5]);
-            }
-            rotate([90,0,0]) {
-                translate([10,10,-2]) {
-                    cylinder(3,5,5,false);
+    difference() {
+        union() {
+            translate([0,0,-19]) {
+                difference() {
+                    cube([20,46,17]);
+                    translate([1,3,-0.5]) {
+                        cube([18,42,15.5]);
+                    }
+                    translate([10,36,13]) {
+                        cylinder(5,5.2,5.2,false);
+                    }
+                    translate([10,24,13]) {
+                        cylinder(5,5.2,5.2,false);
+                    }
+                    translate([10,12,13]) {
+                        cylinder(5,5.2,5.2,false);
+                    }
+                    translate([0.5,-0.5,36]) {
+                        cube([18,46,2.5]);
+                    }
+                    rotate([90,0,0]) {
+                        translate([10,10,-4]) {
+                            cylinder(5,5,5,false);
+                        }
+                    }
+                }
+                
+                translate([0.5,3,1]) {
+                    difference() {
+                        cube([19,3,15]);
+                        rotate([90,0,0]) {
+                            translate([9.5,9,-2]) {
+                                cylinder(2.5,5,5);
+                            }
+                        }
+                        rotate([90,0,0]) {
+                            translate([9.5,9,-3.5]) {
+                                cylinder(2,4,4);
+                            }
+                        }
+                    }
                 }
             }
         }
         
-        translate([2.5,1,1]) {
-            difference() {
-                cube([15,3,15]);
-                rotate([90,0,0]) {
-                    translate([7.5,9,-2]) {
-                        cylinder(2.5,5,5);
-                    }
-                }
-                rotate([180,-90,0]) {
-                    translate([9,-1,9]) {
-                        cylinder(5.5,1,0.2);
-                    }
-                }
-
-                rotate([180,90,0]) {
-                    translate([-9,-1,-6]) {
-                        cylinder(5.5,1,0.2);
-                    }
-                }
-
-                rotate([90,0,0]) {
-                    translate([7.5,9,-3.5]) {
-                        cylinder(2,4,4);
-                    }
-                }
+        rotate([180,-90,0]) {
+            translate([-9,-2.5,14.5]) {
+                cylinder(4.5,1,1);
             }
         }
+
+        rotate([180,90,0]) {
+            translate([9,-2.5,-5.5]) {
+                cylinder(4.5,1,1);
+            }
+        }
+
+        translate([2.5,4.5,-19.5]) {
+            cylinder(4.5,1,1);
+        }
+
+        translate([17.5,4.5,-19.5]) {
+            cylinder(4.5,1,1);
+        }
+
     }
-    
-    translate([2,2,-18]) {
-        screwHolder(15,1);
+
+    translate([2.5,43.5,-18]) {
+        screwHolder(15,1.5);
     }
-    translate([18,2,-18]) {
-        screwHolder(15,1);
+    translate([17.5,43.5,-18]) {
+        screwHolder(15,1.5);
     }
-    translate([2,42,-18]) {
-        screwHolder(15,1);
-    }
-    translate([18,42,-18]) {
-        screwHolder(15,1);
-    }
-    
 }
 
 module pole() {
@@ -169,20 +175,20 @@ module bottomBox() {
 }
 
 translate([-10,0,15]) {
-    lightsFacade();
+    !lightsFacade();
 }
 
 translate([-10,0,9]) {
-    !lightsBox();
+    lightsBox();
 }
 
-translate([0,-1,0]) {
+*translate([0,-1,0]) {
     rotate([90,0,0]) {
         pole();
     }
 }
 
-translate([-25,-102,-47.5]) {
+*translate([-25,-102,-47.5]) {
     rotate([90,0,0]) {
         bottomBox();
     }
