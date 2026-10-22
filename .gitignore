@@ -1,0 +1,13 @@
+# Local editor and macOS files
+/.vscode/
+.DS_Store
+
+# Firmware build output and device-specific captures
+/firmware/.pio/
+/firmware/sdkconfig.esp32*
+/firmware/backups/
+/firmware/logs/
+
+# Generated 3D-print files
+/enclosure/build/
+/enclosure/print/
